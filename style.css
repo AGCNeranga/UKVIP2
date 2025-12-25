@@ -33,8 +33,7 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.4);
   border-radius: 25px;
   padding: 40px;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.15), 
-              inset 0 0 10px rgba(255,255,255,0.5);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.15);
   animation: slideUp 0.8s ease-out;
 }
 
@@ -51,13 +50,6 @@ body {
 .neon-input {
   border: 2px solid #c5e1a5;
   border-radius: 12px;
-  transition: box-shadow 0.3s ease;
-}
-
-.neon-input:focus {
-  box-shadow: 0 0 15px var(--neon-green);
-  border-color: var(--neon-green);
-  outline: none;
 }
 
 .btn {
@@ -71,15 +63,9 @@ body {
 
 .btn:hover { transform: translateY(-4px) scale(1.05); }
 
-.btn-neon-green { background: #43a047; color: white; box-shadow: 0 4px 15px rgba(67, 160, 71, 0.4); }
-.btn-neon-green:hover { background: var(--neon-green); color: #000; box-shadow: 0 0 20px var(--neon-green); }
-
+.btn-neon-green { background: #43a047; color: white; }
 .btn-neon-red { background: #e53935; color: white; }
-.btn-neon-red:hover { background: var(--neon-red); box-shadow: 0 0 20px var(--neon-red); }
-
 .btn-neon-yellow { background: #fbc02d; color: white; }
-.btn-neon-yellow:hover { background: var(--neon-yellow); color: #000; box-shadow: 0 0 20px var(--neon-yellow); }
-
 .btn-neon-blue { background: #1e88e5; color: white; }
 .btn-neon-info { background: #00acc1; color: white; }
 .btn-neon-print { background: #546e7a; color: white; }
@@ -107,22 +93,17 @@ body {
   background-color: #2e7d32;
   color: white;
   padding: 15px;
-  text-align: left;
 }
 
 .vip-table td {
   padding: 12px 15px;
   border-bottom: 1px solid #e8f5e9;
-  color: #333;
 }
-
-.vip-table tr:nth-child(even) { background-color: #f1f8e9; }
-.vip-table tr:hover { background-color: #e8f5e9; }
 
 .flag-icon { width: 80px; margin-bottom: 15px; }
 
 @media print {
-  body * { visibility: hidden; background: none !important; color: black !important; }
+  body * { visibility: hidden; }
   .print-area, .print-area * { visibility: visible; }
   .print-area { position: absolute; left: 0; top: 0; width: 100%; }
 }
