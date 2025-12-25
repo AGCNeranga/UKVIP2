@@ -113,7 +113,6 @@ function processText(mode = 'block') {
   renderRaces(races, mode);
 }
 
-// Updated Render Function to support Tables
 function renderRaces(races, mode = currentDisplayMode) {
   const output = document.getElementById('output');
   
@@ -176,21 +175,17 @@ function showBestRacePerMeeting() {
   renderRaces(Object.values(bestRaces).sort((a, b) => b.prize - a.prize));
 }
 
-// New PDF Download with Header/Footer
 function downloadPDF() {
   if (!processedRaces.length) { alert("No data to download."); return; }
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
-
   doc.setFontSize(16);
-  doc.text("UK RAFFLE-ELIGIBLE RACES REPORT", 14, 15); // Header
+  doc.text("UK RAFFLE-ELIGIBLE RACES REPORT", 14, 15);
   doc.setFontSize(10);
   doc.text("Generated via VIP Dashboard Access", 14, 22);
-
   const tableData = processedRaces.map(r => [
     r.meeting, r.raceNumber, r.ukTime, r.rawSLTime, r.raceName, r.prize.toLocaleString()
   ]);
-
   doc.autoTable({
     head: [['Meeting', 'No.', 'UK Time', 'SL Time', 'Race Name', 'Prize (£)']],
     body: tableData,
@@ -198,9 +193,8 @@ function downloadPDF() {
     theme: 'grid',
     headStyles: { fillColor: [67, 160, 71] }
   });
-
   const finalY = doc.lastAutoTable.finalY || 30;
-  doc.text("Copyright © 2025. VIP Premium Publication - Charith Neranga.", 14, finalY + 10); // Footer
+  doc.text("Copyright © 2025. VIP Premium Publication - Charith Neranga.", 14, finalY + 10);
   doc.save("VIP_Race_Report.pdf");
 }
 
@@ -215,5 +209,23 @@ function downloadTXT() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url; a.download = "Races_Report.txt";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+
+// NEW FUNCTION: Stables TXT Output format
+function downloadStablesTXT() {
+  if (!processedRaces.length) { alert("No data available."); return; }
+  let textContent = "";
+  processedRaces.forEach((r) => {
+    textContent += `UK TIME: ${r.ukTime}\n`;
+    textContent += `SL TIME: ${r.rawSLTime}\n`;
+    textContent += `RACE COURSE: ${r.meeting}\n`;
+    textContent += `RACE NAME: ${r.raceName}\n`;
+    textContent += `Prize MONEY: £${r.prize.toLocaleString()}\n\n`;
+  });
+  const blob = new Blob([textContent], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = "Stables_Output.txt";
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
 }
