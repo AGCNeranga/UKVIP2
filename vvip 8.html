@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="Charith Neranga - LS Publication Dept.">
+  <meta name="copyright" content="© 2026 LS Publication Dept. Unique ID: LSPUB-778899-CN">
+  <title>VIP RAFFLE-ELIGIBLE RACES</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.autotable.min.js"></script>
+  <style>
+    :root {
+      --neon-green: #39FF14;
+      --neon-yellow: #FFFF33;
+      --neon-red: #FF3131;
+      --soft-yellow: #f9fbe7;
+      --soft-green: #e8f5e9;
+      --table-blue: #0070c0;
+    }
+
+    body { margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; background-color: var(--soft-yellow); min-height: 100vh; }
+    #bg1 { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%); z-index: -1; }
+    .overlay { padding: 40px 20px; display: flex; justify-content: center; }
+
+    .password-screen, .container-main {
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(15px);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      border-radius: 25px;
+      padding: 40px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+      animation: slideUp 0.8s ease-out;
+    }
+
+    @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .password-screen { max-width: 450px; text-align: center; margin-top: 50px; }
+    .neon-text-green { color: #2e7d32; text-shadow: 0 0 10px var(--neon-green); font-weight: 800; }
+    .neon-text-yellow { color: #f9a825; text-shadow: 0 0 10px var(--neon-yellow); font-weight: 800; }
+    .neon-input { border: 2px solid #c5e1a5; border-radius: 12px; }
+
+    .btn { border-radius: 12px; font-weight: bold; text-transform: uppercase; transition: all 0.3s; border: none; padding: 10px 20px; }
+    .btn:hover { transform: translateY(-4px) scale(1.05); }
+    .btn-neon-green { background: #43a047; color: white; }
+    .btn-neon-red { background: #e53935; color: white; }
+    .btn-neon-yellow { background: #fbc02d; color: white; }
+    .btn-neon-blue { background: #1e88e5; color: white; }
+    .btn-neon-info { background: #00acc1; color: white; }
+    .btn-neon-print { background: #546e7a; color: white; }
+
+    .race-block { background: white; border-left: 10px solid #43a047; padding: 20px; margin-bottom: 20px; border-radius: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+
+    .vip-table { width: 100%; background: white; border-collapse: collapse; border-radius: 15px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin-top: 20px; }
+    .vip-table th { background-color: #2e7d32; color: white; padding: 15px; }
+    .vip-table td { padding: 12px 15px; border-bottom: 1px solid #e8f5e9; text-align: center; }
+
+    .highlight-table { width: 100%; border: 3px solid #7030a0; border-collapse: collapse; background: white; margin-top: 20px; table-layout: fixed; }
+    .highlight-table th { background-color: #fff2cc; color: var(--table-blue); text-align: center; padding: 10px 5px; border: 2px dotted var(--table-blue); font-weight: bold; font-size: 0.9rem; }
+    .highlight-table td { border: 2px dotted var(--table-blue); padding: 10px; text-align: center; vertical-align: middle; font-weight: 500; word-wrap: break-word; }
+    
+    .preview-box { background: #222; color: #39FF14; font-family: monospace; padding: 15px; border-radius: 10px; overflow-x: auto; white-space: pre; font-size: 12px; margin-bottom: 20px; display: none; border: 2px solid #444; }
+    .edit-mode-active td { background-color: #fffde7 !important; cursor: text; outline: 1px dashed #fbc02d; }
+    .toggle-container { background: #f1f8e9; padding: 10px 20px; border-radius: 50px; border: 1px solid #c5e1a5; display: inline-flex; align-items: center; gap: 10px; margin-bottom: 15px; }
+    
+    .time-cell { font-weight: bold; line-height: 1.2; display: block; }
+    .ampm { font-size: 0.8rem; display: block; margin-top: 2px; }
+    .prize-highlight { color: var(--table-blue); font-weight: bold; }
+    .flag-icon { width: 80px; margin-bottom: 15px; }
+
+    /* Stats Display Styling */
+    .stats-container { background: #fffde7; border: 2px solid #fbc02d; border-radius: 15px; padding: 15px; margin-bottom: 20px; display: none; text-align: center; }
+    .stat-badge { background: #2e7d32; color: white; padding: 5px 15px; border-radius: 20px; font-weight: bold; margin: 0 10px; display: inline-block; }
+
+    /* Meeting Picker Styles */
+    .meeting-badge { cursor: pointer; background: #e8f5e9; color: #2e7d32; border: 1px solid #c5e1a5; padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; display: inline-block; margin: 3px; transition: all 0.2s; }
+    .meeting-badge:hover { background: #2e7d32; color: white; }
+
+    @media print {
+      @page { size: auto; margin: 15mm; }
+      body { background: white !important; -webkit-print-color-adjust: exact; }
+      #bg1, .btn, #raceText, .row, .d-flex, footer, .password-screen, #meetingsInput, .mb-3, .mb-4, .preview-box, .toggle-container, #meetingPicker, .stats-container { display: none !important; }
+      .container-main { box-shadow: none !important; border: none !important; width: 100% !important; margin: 0 !important; padding: 0 !important; overflow: visible !important; }
+      .overlay { padding: 0 !important; display: block !important; }
+      #output, .print-area { visibility: visible !important; width: 100% !important; position: static !important; overflow: visible !important; }
+      .highlight-table { border: 2px solid #7030a0 !important; width: 100% !important; page-break-inside: auto; }
+      .highlight-table tr { page-break-inside: avoid; page-break-after: auto; }
+      .highlight-table td, .highlight-table th { font-size: 9pt !important; border: 1px dotted var(--table-blue) !important; padding: 8px !important; }
+    }
+  </style>
+</head>
+<body>
+  <div id="bg1"></div>
+
+  <div class="overlay"> 
+    <div id="passwordScreen" class="password-screen">
+      <img src="https://lottiefolder.com/wp-content/uploads/2022/11/lottie-flag-animation-uk-1.gif" class="flag-icon" />
+      <h2 class="neon-text-green mb-3">UK RAFFLE ACCESS</h2>
+      <img src="https://i.gifer.com/7qQf.gif" width="220" class="mb-3" style="border-radius: 50%; border: 2px solid #39FF14;" />
+      <input type="password" id="password" class="form-control mb-3 neon-input" placeholder="Enter VIP Password..." onkeypress="handleKeyPress(event)" />
+      <button class="btn btn-neon-green w-100" onclick="checkPassword()">Unlock Premium Access</button>
+    </div>
+
+    <div class="container container-main" id="mainContent" style="display: none;">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="neon-text-yellow">VIP DASHBOARD</h2>
+        <button class="btn btn-neon-red btn-sm" onclick="logout()">Logout</button>
+      </div>
+      
+      <textarea id="raceText" rows="10" class="form-control mb-2 neon-input" placeholder="Paste race card text here..."></textarea>
+      
+      <div class="mb-3">
+        <button class="btn btn-sm btn-outline-success" onclick="extractMeetings()">Show All Available Meetings</button>
+        <div id="meetingPicker" class="mt-2"></div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-md-12">
+            <input type="text" id="meetingsInput" class="form-control mb-3 neon-input" placeholder="Enter meeting names (comma separated)" />
+        </div>
+        <div class="col-md-6">
+          <input type="number" id="minPrize" class="form-control mb-3 neon-input" placeholder="Min Prize (£)" />
+        </div>
+        <div class="col-md-6">
+          <input type="number" id="maxPrize" class="form-control mb-3 neon-input" placeholder="Max Prize (£)" />
+        </div>
+      </div>
+
+      <div class="d-flex gap-2 mb-2 flex-wrap justify-content-center">
+        <button class="btn btn-neon-blue" onclick="processText('highlight')">Today's Highlights</button>
+        <button class="btn btn-neon-green" onclick="processText('table')">Process to Table</button>
+        <button class="btn btn-neon-green" onclick="processText('block')">Process (Blocks)</button>
+        <button class="btn btn-neon-red" onclick="clearAll()">Clear All</button>
+        <button class="btn btn-neon-yellow" onclick="showTopRaces(5)">Top 5</button>
+        <button class="btn btn-neon-yellow" onclick="showTopRaces(10)">Top 10</button>
+        <button class="btn btn-neon-blue" onclick="showBestRacePerMeeting()">Best Race/Meeting</button>
+        <button class="btn btn-neon-info" onclick="toggleStats()">Show Stats</button>
+      </div>
+
+      <div class="d-flex gap-2 mb-4 flex-wrap justify-content-center">
+        <button class="btn btn-neon-info" onclick="togglePreview()">Show/Hide TXT Preview</button>
+        <button class="btn btn-neon-info" onclick="downloadTXT()">Download TXT</button>
+        <button class="btn btn-neon-info" onclick="downloadPDF()">Download PDF</button>
+        <button class="btn btn-neon-print" onclick="window.print()">Print Output</button>
+      </div>
+
+      <center>
+        <div class="toggle-container">
+          <span style="font-weight: bold; color: #2e7d32;">Edit Table Data:</span>
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="editToggle" onchange="toggleEditMode()">
+            <label class="form-check-label" for="editToggle" id="toggleLabel">OFF</label>
+          </div>
+        </div>
+      </center>
+
+      <div id="statsBox" class="stats-container">
+        <h5 style="color: #2e7d32; font-weight: bold; margin-bottom: 10px;">DATA SUMMARY</h5>
+        <div>
+          <span>Total Meetings: <span id="statMeetings" class="stat-badge">0</span></span>
+          <span>Total Races: <span id="statRaces" class="stat-badge">0</span></span>
+        </div>
+      </div>
+
+      <div id="txtPreview" class="preview-box"></div>
+      <div id="output" class="print-area"></div>
+
+      <footer class="mt-5 text-center py-3" style="color: #2e7d32; font-weight: bold; border-top: 1px solid rgba(0,0,0,0.1);">
+        © 2026 | LS Publication Dept. | Developed by Charith Neranga
+      </footer>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('contextmenu', event => event.preventDefault());
+    
+    function checkPassword() {
+      const entered = document.getElementById("password").value;
+      if (entered === "lal1234") {
+        document.getElementById("passwordScreen").style.display = "none";
+        document.getElementById("mainContent").style.display = "block";
+      } else { alert("Incorrect VIP Password!"); }
+    }
+
+    function handleKeyPress(e) { if (e.key === "Enter") { checkPassword(); } }
+    function logout() { window.location.href = "https://agcneranga.github.io/LS-Publication/"; }
+
+    let processedRaces = [];
+    let currentDisplayMode = 'block';
+
+    function toggleStats() {
+      const box = document.getElementById('statsBox');
+      box.style.display = (box.style.display === 'block') ? 'none' : 'block';
+      updateStats();
+    }
+
+    function updateStats() {
+      const uniqueMeetings = new Set(processedRaces.map(r => r.meeting)).size;
+      document.getElementById('statMeetings').innerText = uniqueMeetings;
+      document.getElementById('statRaces').innerText = processedRaces.length;
+    }
+
+    function extractMeetings() {
+      const text = document.getElementById('raceText').value;
+      if (!text.trim()) { alert('Please paste race card text first.'); return; }
+      const lines = text.split(/\r?\n/);
+      let meetings = new Set();
+      for (let line of lines) {
+        line = line.trim();
+        if (/^[A-Z\s\-']{1,30}$/.test(line) && !line.match(/\d/) && line.length > 2 && !line.includes('£')) {
+          meetings.add(line);
+        }
+      }
+      const picker = document.getElementById('meetingPicker');
+      picker.innerHTML = Array.from(meetings).map(m => `<span class="meeting-badge" onclick="addMeetingToInput('${m}')">${m}</span>`).join('');
+    }
+
+    function addMeetingToInput(name) {
+      const input = document.getElementById('meetingsInput');
+      let current = input.value.split(',').map(v => v.trim()).filter(v => v !== "");
+      if (!current.includes(name)) {
+        current.push(name);
+        input.value = current.join(', ');
+      }
+    }
+
+    function toggleEditMode() {
+      const isChecked = document.getElementById('editToggle').checked;
+      const label = document.getElementById('toggleLabel');
+      const output = document.getElementById('output');
+      
+      label.innerText = isChecked ? "ON (Editable)" : "OFF";
+      
+      if (isChecked) {
+        output.classList.add('edit-mode-active');
+        document.querySelectorAll('#output td').forEach(td => td.contentEditable = true);
+      } else {
+        output.classList.remove('edit-mode-active');
+        document.querySelectorAll('#output td').forEach(td => td.contentEditable = false);
+        syncDataFromTable();
+      }
+    }
+
+    function syncDataFromTable() {
+      if (currentDisplayMode !== 'table' && currentDisplayMode !== 'highlight') return;
+      const rows = document.querySelectorAll('#output tbody tr');
+      let newData = [];
+      rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        if (currentDisplayMode === 'table') {
+          newData.push({
+            meeting: cells[0].innerText,
+            raceNumber: cells[1].innerText,
+            ukTime: cells[2].innerText.split(' ')[0],
+            rawSLTime: cells[3].innerText.split(' ')[0],
+            raceName: cells[4].innerText,
+            prize: parseInt(cells[5].innerText.replace(/[^0-9]/g, ''))
+          });
+        } else if (currentDisplayMode === 'highlight') {
+          newData.push({
+            ukTime: cells[0].innerText.split(' ')[0],
+            rawSLTime: cells[1].innerText.split(' ')[0],
+            meeting: cells[2].innerText,
+            raceName: cells[3].innerText,
+            prize: parseInt(cells[4].innerText.replace(/[^0-9]/g, ''))
+          });
+        }
+      });
+      if (newData.length > 0) {
+        processedRaces = newData;
+        updateTXTPreview();
+        updateStats();
+      }
+    }
+
+    function togglePreview() {
+      const p = document.getElementById('txtPreview');
+      p.style.display = (p.style.display === 'block') ? 'none' : 'block';
+      updateTXTPreview();
+    }
+
+    function updateTXTPreview() {
+      if (!processedRaces.length) return;
+      document.getElementById('txtPreview').innerText = generateTXTContent();
+    }
+
+    function generateTXTContent() {
+      const col1 = 12, col2 = 12, col3 = 22, col4 = 60, col5 = 15;
+      let txt = "UK TIME".padEnd(col1) + "SL TIME".padEnd(col2) + "RACE COURSE".padEnd(col3) + "RACE NAME".padEnd(col4) + "PRIZE MONEY\n";
+      txt += "-".repeat(col1 + col2 + col3 + col4 + col5) + "\n";
+
+      processedRaces.forEach(r => {
+        const ukT = formatTime(r.ukTime);
+        const slT = formatTime(r.rawSLTime);
+        const fUK = (`${ukT.time} ${ukT.ampm}`).padEnd(col1);
+        const fSL = (`${slT.time} ${slT.ampm}`).padEnd(col2);
+        const fCourse = r.meeting.substring(0, 20).padEnd(col3);
+        const raceName = r.raceName;
+        const prizeStr = `£${r.prize.toLocaleString()}`;
+        
+        if (raceName.length <= col4 - 2) {
+            txt += `${fUK}${fSL}${fCourse}${raceName.padEnd(col4)}${prizeStr}\n`;
+        } else {
+            txt += `${fUK}${fSL}${fCourse}${raceName.substring(0, col4 - 2).padEnd(col4)}${prizeStr}\n`;
+            let remaining = raceName.substring(col4 - 2);
+            while (remaining.length > 0) {
+                txt += "".padEnd(col1 + col2 + col3) + remaining.substring(0, col4 - 2).padEnd(col4) + "\n";
+                remaining = remaining.substring(col4 - 2);
+            }
+        }
+      });
+      return txt;
+    }
+
+    function processText(mode = 'block') {
+      currentDisplayMode = mode;
+      const text = document.getElementById('raceText').value;
+      const minPrize = parseInt(document.getElementById('minPrize').value || 0);
+      const maxPrize = parseInt(document.getElementById('maxPrize').value || 99999999);
+      const meetingsRaw = document.getElementById('meetingsInput').value;
+      const filter = meetingsRaw ? meetingsRaw.split(',').map(m => m.trim().toUpperCase()).filter(m => m.length > 0) : [];
+
+      if (!text.trim()) { alert('Please paste race card text first.'); return; }
+
+      const lines = text.split(/\r?\n/);
+      let currentMeeting = 'Unknown';
+      let races = [];
+      const explicitRaceLineRegex = /^([\w]+(?:\s*\/\s*\d+)?)[\s]+(\d{1,2}[—:]\d{2})/;
+
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (/^[A-Z\s\-']{1,30}$/.test(line) && !line.match(/\d/) && !line.includes('£')) {
+          currentMeeting = line;
+          continue;
+        }
+
+        let explicitMatch = line.match(explicitRaceLineRegex);
+        if (explicitMatch) {
+          const raceNumber = explicitMatch[1].trim();
+          const ukTime = explicitMatch[2].replace('—', ':');
+          let slTime = 'N/A', prize = 0, raceNameLines = [];
+
+          for (let j = i + 1; j < Math.min(i + 12, lines.length); j++) {
+            const l = lines[j].trim();
+            if (slTime === 'N/A' && /^\(?\d{1,2}[:.—]\d{2}\)?$/.test(l)) { 
+                slTime = l.replace(/[()]/g, '').replace(/[.—]/g, ':'); 
+                continue; 
+            }
+            if (l.includes('£')) {
+              const pMatch = l.match(/£([\d,]+)/);
+              if (pMatch) prize = parseInt(pMatch[1].replace(/,/g, ''));
+              break;
+            }
+            if (l.length > 2 && !/^\(?\d{1,2}[.:—]\d{2}\)?$/.test(l)) { raceNameLines.push(l); }
+          }
+          
+          if (filter.length && !filter.includes(currentMeeting.toUpperCase())) continue;
+          if (prize >= minPrize && prize <= maxPrize) {
+            races.push({meeting: currentMeeting, raceNumber, ukTime, rawSLTime: slTime, raceName: raceNameLines.join(' '), prize});
+          }
+        }
+      }
+
+      races.sort((a, b) => {
+        const timeToMinutes = t => {
+          if (t === 'N/A') return 9999;
+          const parts = t.split(':').map(Number);
+          return (parts[0] || 0) * 60 + (parts[1] || 0);
+        };
+        return timeToMinutes(a.rawSLTime) - timeToMinutes(b.rawSLTime);
+      });
+
+      processedRaces = races;
+      renderRaces(races, mode);
+      updateTXTPreview();
+      updateStats();
+    }
+
+    function renderRaces(races, mode = currentDisplayMode) {
+      const output = document.getElementById('output');
+      let html = '';
+      if (mode === 'highlight') {
+        html = `<table class="highlight-table"><thead><tr><th>UK TIME</th><th>SL TIME</th><th>RACE COURSE</th><th>RACE NAME</th><th>PRIZE MONEY</th></tr></thead><tbody>`;
+        races.forEach(r => {
+          const ukT = formatTime(r.ukTime); const slT = formatTime(r.rawSLTime);
+          html += `<tr><td>${ukT.time} ${ukT.ampm}</td><td>${slT.time} ${slT.ampm}</td><td>${r.meeting}</td><td style="text-align:left;">${r.raceName}</td><td class="prize-highlight">£${r.prize.toLocaleString()}</td></tr>`;
+        });
+        html += "</tbody></table>";
+      } else if (mode === 'table') {
+        html = `<table class="vip-table"><thead><tr><th>Meeting</th><th>No.</th><th>UK Time</th><th>SL Time</th><th>Race Name</th><th>Prize (£)</th></tr></thead><tbody>`;
+        races.forEach(r => {
+          const ukT = formatTime(r.ukTime); const slT = formatTime(r.rawSLTime);
+          html += `<tr><td>${r.meeting}</td><td>${r.raceNumber}</td><td>${ukT.time} ${ukT.ampm}</td><td>${slT.time} ${slT.ampm}</td><td>${r.raceName}</td><td>${r.prize.toLocaleString()}</td></tr>`;
+        });
+        html += "</tbody></table>";
+      } else {
+        html = races.map(r => {
+          const ukT = formatTime(r.ukTime); const slT = formatTime(r.rawSLTime);
+          return `<div class="race-block"><strong>${r.meeting}</strong> | UK: ${ukT.time}${ukT.ampm} | SL: ${slT.time}${slT.ampm} | £${r.prize.toLocaleString()}<br>${r.raceName}</div>`;
+        }).join('');
+      }
+      output.innerHTML = html;
+      if (document.getElementById('editToggle').checked) toggleEditMode();
+      updateStats();
+    }
+
+    function formatTime(t) {
+      if (t === 'N/A' || !t) return { time: 'N/A', ampm: '' };
+      const parts = t.replace(/[—.]/g, ':').split(':');
+      let hr = parseInt(parts[0]);
+      return { time: t.replace(/[—.]/g, ':'), ampm: (hr >= 12 || hr < 9) ? "PM" : "AM" };
+    }
+
+    function showTopRaces(limit) {
+      if (!processedRaces.length) return;
+      const top = [...processedRaces].sort((a, b) => b.prize - a.prize).slice(0, limit);
+      renderRaces(top);
+    }
+
+    function showBestRacePerMeeting() {
+      if (!processedRaces.length) return;
+      const best = {};
+      processedRaces.forEach(r => { if (!best[r.meeting] || r.prize > best[r.meeting].prize) best[r.meeting] = r; });
+      renderRaces(Object.values(best).sort((a,b)=>b.prize-a.prize));
+    }
+
+    function downloadTXT() {
+      syncDataFromTable();
+      if (!processedRaces.length) { alert("No data to download."); return; }
+      const blob = new Blob([generateTXTContent()], { type: 'text/plain' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = "VIP_Races_Report.txt";
+      a.click();
+    }
+
+    function downloadPDF() {
+      if (!processedRaces.length) return;
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF('p', 'mm', 'a4');
+      doc.text("UK RAFFLE REPORT", 105, 15, { align: 'center' });
+      const data = processedRaces.map(r => [r.ukTime, r.rawSLTime, r.meeting, r.raceName, `£${r.prize}`]);
+      doc.autoTable({ head: [['UK', 'SL', 'COURSE', 'NAME', 'PRIZE']], body: data, startY: 20 });
+      doc.save("Report.pdf");
+    }
+
+    function clearAll() {
+      document.getElementById('raceText').value = '';
+      document.getElementById('output').innerHTML = '';
+      document.getElementById('txtPreview').innerText = '';
+      document.getElementById('meetingsInput').value = '';
+      document.getElementById('meetingPicker').innerHTML = '';
+      document.getElementById('statsBox').style.display = 'none';
+      processedRaces = [];
+    }
+  </script>
+</body>
+</html>
